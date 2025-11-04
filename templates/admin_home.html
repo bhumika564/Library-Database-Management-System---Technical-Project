@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Home</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 2rem;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+        }
+        .header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .btn-logout {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #007bff;
+            background-color: #f0f8ff;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .module-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .module-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+        .module-card h2 {
+            margin-top: 0;
+            color: #007bff;
+            margin-bottom: 1.5rem;
+        }
+        .module-card a {
+            display: block;
+            background-color: #007bff;
+            color: white;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        .module-card a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Admin Home Page</h1>
+        <a href="/admin-login" class="btn-logout">Log Out</a>
+    </div>
+
+    <div class="module-container">
+        
+        <div class="module-card">
+            <h2>Maintenance</h2>
+            <p>Add/Update books, members, and users.</p>
+            <a href="/add-membership-page">Add Membership</a>
+            <a href="/update-membership-page">Update Membership</a>
+            <a href="/add-book-page">Add Book/Movie</a>
+            <a href="/user-management">User Management</a>
+        </div>
+
+        <div class="module-card">
+            <h2>Reports</h2>
+            <p>View lists of books, members, and issues.</p>
+            <a href="/master-list-books">Master List of Books</a>
+            <a href="/master-list-memberships">Master List of Memberships</a>
+            <a href="/active-issues-page">Active Issues</a>
+            <a href="/overdue-returns-page">Overdue Returns</a>
+        </div>
+
+        <div class="module-card">
+            <h2>Transactions</h2>
+            <p>Issue or return books and manage fines.</p>
+            <a href="/book-available-page">Is book available?</a>
+            <a href="/book-issue-page">Book Issue</a>
+            <a href="/return-book-page">Return Book</a>
+            <a href="/pay-fine-page">Pay Fine</a>
+        </div>
+    </div>
+
+</body>
+</html>

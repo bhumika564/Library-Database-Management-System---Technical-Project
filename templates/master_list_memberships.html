@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master List of Memberships</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7f6; padding: 2rem; }
+        .container { 
+            background-color: #ffffff; 
+            padding: 2rem; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
+            width: 100%; 
+            max-width: 1400px; /* Ye table bohot chauda (wide) hai */
+            margin: auto;
+            overflow-x: auto; /* Agar screen chhoti ho to scroll kar sakein */
+        }
+        h1 { text-align: center; color: #333; margin-bottom: 1.5rem; }
+        .home-link {
+            display: inline-block;
+            background-color: #f1f1f1;
+            color: #555;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.9rem;
+            white-space: nowrap; /* Data ko ek line mein rakhna */
+        }
+        th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="/admin-home" class="home-link">Back to Admin Home</a>
+        <h1>Master List of Memberships</h1>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Membership Id</th>
+                    <th>Name of Member</th>
+                    <th>Contact Number</th>
+                    <th>Contact Address</th>
+                    <th>Aadhar Card No</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Amount Pending (Fine)</th>
+                </tr>
+            </thead>
+            <tbody id="membersTableBody">
+                </tbody>
+        </table>
+        <p id="loadingMessage">Loading member list...</p>
+    </div>
+
+    <script>
+        
+        window.onload = async function() {
+            const tableBody = document.getElementById('membersTableBody');
+            const loadingMessage = document.getElementById('loadingMessage');
+            
+            try {
+                
+                const response = await fetch('/api/get-all-memberships');
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const members = await response.json();
+                
+                
+                if (members.length === 0) {
+                    loadingMessage.textContent = 'No members found.';
+                    return;
+                }
+
+                tableBody.innerHTML = ''; // "Loading..." waala text hatana
+
+                members.forEach(member => {
+                    
+                    const row = document.createElement('tr');
+                    
+                    const startDate = new Date(member.MembershipStartDate).toISOString().split('T')[0];
+                    const endDate = new Date(member.MembershipEndDate).toISOString().split('T')[0];
+                    
+                    row.innerHTML = `
+                        <td>${member.MembershipID}</td>
+                        <td>${member.FirstName} ${member.LastName}</td>
+                        <td>${member.ContactNumber}</td>
+                        <td>${member.ContactAddress}</td>
+                        <td>${member.AadharCardNo}</td>
+                        <td>${startDate}</td>
+                        <td>${endDate}</td>
+                        <td>${member.Status}</td>
+                        <td>${member.TotalFineDue}</td> ```
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                loadingMessage.style.display = 'none'; // Loading message ko chhupana
+
+            } catch (error) {
+                console.error('Error fetching members:', error);
+                loadingMessage.textContent = 'Failed to load member list. Please check server.';
+                loadingMessage.style.color = 'red';
+            }
+        };
+    </script>
+</body>
+</html>

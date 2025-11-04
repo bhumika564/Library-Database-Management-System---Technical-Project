@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Book / Movie</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; padding: 2rem; }
+        .container { background-color: #ffffff; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); width: 100%; max-width: 500px; }
+        h1 { text-align: center; color: #333; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #555; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.75rem; box-sizing: border-box; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; }
+        .radio-group { display: flex; gap: 1rem; align-items: center; }
+        .button-group { display: flex; justify-content: space-between; margin-top: 2rem; }
+        .button { padding: 0.75rem 1.5rem; border: none; border-radius: 5px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .btn-submit { background-color: #007bff; color: white; }
+        .btn-cancel { background-color: #f1f1f1; color: #555; text-decoration: none; text-align: center; }
+        #message { margin-top: 1rem; font-size: 0.9rem; color: red; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Add Book / Movie</h1>
+        <form id="addItemForm">
+            
+            <div class="form-group">
+                <label>Item Type</label>
+                <div class="radio-group">
+                    <input type="radio" id="itemTypeBook" name="itemType" value="Book" checked>
+                    <label for="itemTypeBook">Book</label>
+                    <input type="radio" id="itemTypeMovie" name="itemType" value="Movie">
+                    <label for="itemTypeMovie">Movie</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="title">Book/Movie Name</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="authorName">Author Name (if book)</label>
+                <input type="text" id="authorName" name="authorName">
+            </div>
+
+            <div class="form-group">
+                <label for="serialNumber">Serial Number (e.g., SC001)</label>
+                <input type="text" id="serialNumber" name="serialNumber" required>
+            </div>
+
+            <div class="form-group">
+                <label for="procurementDate">Date of Procurement</label>
+                <input type="date" id="procurementDate" name="procurementDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="quantity">Quantity/Copies</label>
+                <input type="number" id="quantity" name="quantity" value="1" min="1" required>
+            </div>
+            
+            <p id="message"></p> <div class="button-group">
+                <a href="/admin-home" class="button btn-cancel">Cancel</a>
+                <button type="submit" class="button btn-submit">Add Item</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('addItemForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Page ko reload hone se rokna
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = ''; // Puraane error message hatana
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            // Simple validation
+            if (data.itemType === 'Book' && !data.authorName) {
+                messageEl.textContent = 'Author Name is required for books.';
+                return;
+            }
+            
+            try {
+                // Data ko back-end par bhejna
+                const response = await fetch('/api/add-book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json(); 
+
+                if (response.ok) {
+                    // Success! Confirmation page par bhejna
+                    window.location.href = '/confirmation'; 
+                } else {
+                    // Error dikhana
+                    messageEl.textContent = 'Error: ' + result.message;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                messageEl.textContent = 'A network error occurred.';
+            }
+        });
+
+        // Start Date ko aaj ki date par set karna
+        document.getElementById('procurementDate').value = new Date().toISOString().split('T')[0];
+    </script>
+</body>
+</html>

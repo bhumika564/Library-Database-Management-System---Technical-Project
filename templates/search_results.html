@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7f6; padding: 2rem; }
+        .container { 
+            background-color: #ffffff; 
+            padding: 2rem; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
+            width: 100%; 
+            max-width: 1000px;
+            margin: auto;
+        }
+        h1 { text-align: center; color: #333; margin-bottom: 1.5rem; }
+        .home-link {
+            display: inline-block;
+            background-color: #f1f1f1;
+            color: #555;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 0.75rem; text-align: left; }
+        th { background-color: #f9f9f9; font-weight: 600; }
+        .status-available { color: green; font-weight: bold; }
+        .status-issued { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/book-available-page" class="home-link">Back to Search</a>
+        <h1>Search Results</h1>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Book Name</th>
+                    <th>Author Name</th>
+                    <th>Serial Number</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.Title }}</td>
+                    <td>{{ item.AuthorName or 'N/A' }}</td>
+                    <td>{{ item.SerialNumber }}</td>
+                    
+                    {% if item.Status == 'Available' %}
+                        <td class="status-available">Available</td>
+                        <td>
+                            <a href="/book-issue-page?serial={{ item.SerialNumber }}">Issue This Book</a>
+                        </td>
+                    {% else %}
+                        <td class="status-issued">{{ item.Status }}</td>
+                        <td>(Cannot be issued)</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                
+                {% if not items %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No books found matching your search.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return Book</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; padding: 2rem; }
+        .container { background-color: #ffffff; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); width: 100%; max-width: 500px; }
+        h1, h2 { text-align: center; color: #333; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #555; }
+        .form-group input { width: 100%; padding: 0.75rem; box-sizing: border-box; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; }
+        .form-group input[disabled] { background-color: #eee; }
+        .button-group { display: flex; justify-content: space-between; margin-top: 2rem; }
+        .button { padding: 0.75rem 1.5rem; border: none; border-radius: 5px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .btn-submit { background-color: #007bff; color: white; }
+        .btn-cancel { background-color: #f1f1f1; color: #555; text-decoration: none; text-align: center; }
+        .btn-search { background-color: #28a745; color: white; width: 100%; }
+        #message { margin-top: 1rem; font-size: 0.9rem; color: red; text-align: center; }
+        #returnFormSection { display: none; } /* Shuru mein hidden */
+        .fine-details { background-color: #fff8e1; border: 1px solid #ffecb3; border-radius: 5px; padding: 1rem; }
+        .fine-details.no-fine { background-color: #e8f5e9; border-color: #c8e6c9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="searchSection">
+            <h1>Return Book</h1>
+            <p>Enter the Book Serial Number to find the issued copy.</p>
+            <form id="searchForm">
+                <div class="form-group">
+                    <label for="serialNumberSearch">Book Serial Number</label>
+                    <input type="text" id="serialNumberSearch" name="serialNumberSearch" required>
+                </div>
+                <button type="submit" class="button btn-search">Search Transaction</button>
+                <a href="/admin-home" class="button btn-cancel" style="width: 100%; box-sizing: border-box; margin-top: 0.5rem;">Cancel</a>
+            </form>
+            <p id="searchMessage"></p>
+        </div>
+
+        <form id="returnFormSection">
+            <h2>Confirm Return</h2>
+            <input type="hidden" id="transactionID" name="transactionID">
+            
+            <div class="form-group">
+                <label for="bookName">Book Name</label>
+                <input type="text" id="bookName" name="bookName" disabled>
+            </div>
+            <div class="form-group">
+                <label for="memberName">Member Name</label>
+                <input type="text" id="memberName" name="memberName" disabled>
+            </div>
+            <div class="form-group">
+                <label for="issueDate">Issue Date</label>
+                <input type="date" id="issueDate" name="issueDate" disabled>
+            </div>
+            <div class="form-group">
+                <label for="dueDate">Due Date</label>
+                <input type="date" id="dueDate" name="dueDate" disabled>
+            </div>
+            <div class="form-group">
+                <label for="actualReturnDate">Actual Return Date</label>
+                <input type="date" id="actualReturnDate" name="actualReturnDate" disabled>
+            </div>
+
+            <div id="fineDetails" class="fine-details" style="display: none;">
+                <p><strong>Days Overdue:</strong> <span id="daysOverdue">0</span></p>
+                <p><strong>Fine Calculated:</strong> ₹ <span id="fineCalculated">0.00</span></p>
+                <p id="fineMessage"></p>
+            </div>
+
+            <p id="updateMessage"></p>
+
+            <div class="button-group">
+                <a href="/return-book-page" class="button btn-cancel">Search Again</a>
+                <button type="submit" class="button btn-submit">Confirm Return</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const searchForm = document.getElementById('searchForm');
+        const searchMessage = document.getElementById('searchMessage');
+        const returnFormSection = document.getElementById('returnFormSection');
+        const returnForm = document.getElementById('returnFormSection');
+        const updateMessage = document.getElementById('updateMessage');
+
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('actualReturnDate').value = today;
+
+        // --- Step 1: Search Form ko handle karna ---
+        searchForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            searchMessage.textContent = 'Searching...';
+            
+            const serial = document.getElementById('serialNumberSearch').value;
+            
+            try {
+                // Hum ek naya API banayenge jo 'Issued' book ki transaction details laayega
+                const response = await fetch('/api/search-issued-book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ serialNumber: serial })
+                });
+
+                const details = await response.json();
+
+                if (response.ok) {
+                    // Transaction mil gaya!
+                    // Form ko details se bharo
+                    document.getElementById('transactionID').value = details.TransactionID;
+                    document.getElementById('bookName').value = details.Title;
+                    document.getElementById('memberName').value = details.FirstName + ' ' + details.LastName;
+                    document.getElementById('issueDate').value = new Date(details.IssueDate).toISOString().split('T')[0];
+                    document.getElementById('dueDate').value = new Date(details.DueDate).toISOString().split('T')[0];
+                    
+                    // Fine details dikhana
+                    if (details.DaysOverdue > 0) {
+                        document.getElementById('daysOverdue').textContent = details.DaysOverdue;
+                        document.getElementById('fineCalculated').textContent = details.FineCalculated.toFixed(2);
+                        document.getElementById('fineMessage').textContent = 'A new fine will be added to the member account.';
+                        document.getElementById('fineDetails').style.display = 'block';
+                    } else {
+                        document.getElementById('fineDetails').innerHTML = '<p>No fine due.</p>';
+                        document.getElementById('fineDetails').classList.add('no-fine');
+                        document.getElementById('fineDetails').style.display = 'block';
+                    }
+
+                    // Search section ko chhupao aur Return form ko dikhao
+                    document.getElementById('searchSection').style.display = 'none';
+                    returnFormSection.style.display = 'block';
+                } else {
+                    searchMessage.textContent = 'Error: ' + details.message;
+                }
+            } catch (error) {
+                searchMessage.textContent = 'A network error occurred.';
+            }
+        });
+
+        // --- Step 2: Return Form ko handle karna ---
+        returnForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            updateMessage.textContent = 'Returning...';
+
+            const data = {
+                transactionID: document.getElementById('transactionID').value,
+                actualReturnDate: document.getElementById('actualReturnDate').value
+            };
+
+            try {
+                const response = await fetch('/api/return-book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    window.location.href = '/confirmation';
+                } else {
+                    updateMessage.textContent = 'Error: ' + result.message;
+                }
+            } catch (error) {
+                updateMessage.textContent = 'A network error occurred.';
+            }
+        });
+    </script>
+</body>
+</html>
