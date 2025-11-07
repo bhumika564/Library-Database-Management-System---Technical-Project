@@ -1,40 +1,34 @@
-# A human-readable name for this workflow
-name: Docker Build CI
+name: Docker Build and Push CI
 
-# 1. When does this run?
 on:
-  # Run on every push to the "main" branch
   push:
     branches: [ "main" ]
-  
-  # Also run on pull requests to "main" (good practice)
   pull_request:
     branches: [ "main" ]
 
-# 2. What jobs should it do?
 jobs:
-  # We only have one job, named "build"
   build:
-    # 3. What kind of server should it run on?
-    # We'll use a standard, fresh Ubuntu (Linux) server
     runs-on: ubuntu-latest
 
-    # 4. What are the steps?
     steps:
-      # Step A: Check out our repository's code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step B: Set up Docker's build tools
+      # NEW: Log in to Docker Hub using our secrets
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Step C: Run the docker build command
-      # This is the same as your "docker build -t library-app ."
-      - name: Build the Docker image
+      # UPDATED: This step now builds AND pushes
+      - name: Build and push the Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
-          push: false  # <-- We are only *building*, NOT pushing the image
-          tags: local/library-app:test
+          push: true  # <-- Set to true to push
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/library-app:latest
