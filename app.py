@@ -13,7 +13,7 @@ app.secret_key = os.urandom(24)
 def get_db_connection():
     try:
         connection = mysql.connector.connect(
-            host="localhost",
+            host="host.docker.internal",
             user="root",
             password="",  # Blank password
             database="library_system"
