@@ -1,0 +1,40 @@
+# A human-readable name for this workflow
+name: Docker Build CI
+
+# 1. When does this run?
+on:
+  # Run on every push to the "main" branch
+  push:
+    branches: [ "main" ]
+  
+  # Also run on pull requests to "main" (good practice)
+  pull_request:
+    branches: [ "main" ]
+
+# 2. What jobs should it do?
+jobs:
+  # We only have one job, named "build"
+  build:
+    # 3. What kind of server should it run on?
+    # We'll use a standard, fresh Ubuntu (Linux) server
+    runs-on: ubuntu-latest
+
+    # 4. What are the steps?
+    steps:
+      # Step A: Check out our repository's code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step B: Set up Docker's build tools
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Step C: Run the docker build command
+      # This is the same as your "docker build -t library-app ."
+      - name: Build the Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false  # <-- We are only *building*, NOT pushing the image
+          tags: local/library-app:test
