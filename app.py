@@ -1,7 +1,7 @@
+import os
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 import mysql.connector
 import hashlib 
-import os 
 from datetime import datetime # Date calculation ke liye
 from decimal import Decimal # Decimal bug fix ke liye
 
@@ -12,8 +12,10 @@ app.secret_key = os.urandom(24)
 # --- Database Connection ---
 def get_db_connection():
     try:
+        db_host = os.environ.get("DATABASE_HOST", "host.docker.internal")
+
         connection = mysql.connector.connect(
-            host="host.docker.internal",
+            host=db_host,
             user="root",
             password="",  # Blank password
             database="library_system"
